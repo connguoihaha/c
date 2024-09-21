@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASN Lookup</title>
+    <script>
+        // Hàm để lấy giá trị của tham số từ URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Hàm để fetch dữ liệu từ API và hiển thị kết quả
+        async function lookupASN() {
+            const asnCode = getQueryParam('as');  // Lấy giá trị ASN từ URL
+
+            // Kiểm tra xem ASN có tồn tại trong URL hay không
+            if (!asnCode) {
+                document.body.innerHTML = '<p>Error: ASN parameter is missing in URL.</p>';
+                return;
+            }
+
+            try {
+                // Thực hiện fetch từ API
+                const response = await fetch(`http://45.140.188.18/asn.php?as=AS${asnCode}`);
+                
+                // Kiểm tra phản hồi HTTP có thành công không
+                if (!response.ok) {
+                    document.body.innerHTML = `<p>Error: Failed to fetch data (status ${response.status})</p>`;
+                    return;
+                }
+
+                // Lấy và hiển thị dữ liệu JSON
+                const data = await response.json();
+                document.body.innerHTML = `<pre>${JSON.stringify(data, null, 4)}</pre>`;
+            } catch (error) {
+                // Hiển thị lỗi nếu có vấn đề trong quá trình fetch
+                document.body.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        // Thực hiện lookup khi trang được tải
+        window.onload = lookupASN;
+    </script>
+</head>
+<body>
+    <!-- Nội dung trả về sẽ được thay đổi bằng JavaScript -->
+</body>
+</html>
