@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASN Lookup</title>
+    <title>ASN Lookup from JSON</title>
     <script>
         // Hàm để lấy giá trị của tham số từ URL
         function getQueryParam(param) {
@@ -11,31 +11,39 @@
             return urlParams.get(param);
         }
 
-        // Hàm để fetch dữ liệu từ API và hiển thị kết quả
+        // Hàm để load dữ liệu JSON từ file cục bộ
         async function lookupASN() {
             const asnCode = getQueryParam('as');  // Lấy giá trị ASN từ URL
 
-            // Kiểm tra xem ASN có tồn tại trong URL hay không
+            // Kiểm tra nếu không có ASN trong URL
             if (!asnCode) {
                 document.body.innerHTML = '<p>Error: ASN parameter is missing in URL.</p>';
                 return;
             }
 
             try {
-                // Thực hiện fetch từ API
-                const response = await fetch(`http://45.140.188.18/asn.php?as=AS${asnCode}`);
+                // Load file JSON cục bộ
+                const response = await fetch('asn_data.json');
                 
-                // Kiểm tra phản hồi HTTP có thành công không
+                // Kiểm tra phản hồi có thành công không
                 if (!response.ok) {
-                    document.body.innerHTML = `<p>Error: Failed to fetch data (status ${response.status})</p>`;
+                    document.body.innerHTML = `<p>Error: Failed to load JSON file (status ${response.status})</p>`;
                     return;
                 }
 
-                // Lấy và hiển thị dữ liệu JSON
+                // Lấy dữ liệu JSON
                 const data = await response.json();
-                document.body.innerHTML = `<pre>${JSON.stringify(data, null, 4)}</pre>`;
+
+                // Tìm kiếm ASN trong dữ liệu
+                const asnEntry = data.find(entry => entry.ASN === `AS${asnCode}`);
+
+                // Nếu tìm thấy, hiển thị kết quả, nếu không thì báo lỗi
+                if (asnEntry) {
+                    document.body.innerHTML = `<pre>${JSON.stringify(asnEntry, null, 4)}</pre>`;
+                } else {
+                    document.body.innerHTML = `<p>Error: ASN not found.</p>`;
+                }
             } catch (error) {
-                // Hiển thị lỗi nếu có vấn đề trong quá trình fetch
                 document.body.innerHTML = `<p>Error: ${error.message}</p>`;
             }
         }
@@ -45,6 +53,6 @@
     </script>
 </head>
 <body>
-    <!-- Nội dung trả về sẽ được thay đổi bằng JavaScript -->
+    <!-- Kết quả sẽ hiển thị ở đây -->
 </body>
 </html>
